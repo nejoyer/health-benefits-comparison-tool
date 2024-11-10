@@ -29,6 +29,7 @@ function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
         <li>This doesn't evaluate the time-cost of money (ie. cashflow since I include HSA tax savings, but you might not get that until you get your refund in the spring)</li>
         <li>Assumption: For plans with multiple people, I assume that the Annual Deductible per-person is 1/2 of the total and that the OOPM per-person is 1/2 of the total.</li>
         <li>I did not evaluate situations where an individual would be covered by multiple plans... mostly because I've never been in that situation and I don't know how the insurance would be applied.</li>
+        <li>This hasn't been extensively tested... I probably got some of the calculations wrong. Check the math yourself. If you find discrepancies, let me know.</li>
       </ul>
       <Link to="/companies">
         <button>Get Started</button>

@@ -4,11 +4,11 @@ import { Link, useNavigate } from 'react-router-dom';
 
 function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
   const [planName, setPlanName] = useState('');
-  const [individualDeductible, setIndividualDeductible] = useState('');
-  const [individualOOPMax, setIndividualOOPMax] = useState('');
-  const [familyDeductible, setFamilyDeductible] = useState('');
-  const [familyOOPMax, setFamilyOOPMax] = useState('');
-  const [coinsurance, setCoinsurance] = useState('');
+  const [individualDeductible, setIndividualDeductible] = useState(0);
+  const [individualOOPMax, setIndividualOOPMax] = useState(0);
+  const [familyDeductible, setFamilyDeductible] = useState(0);
+  const [familyOOPMax, setFamilyOOPMax] = useState(0);
+  const [coinsurance, setCoinsurance] = useState(0);
   const [costs, setCosts] = useState(costNames.map(name => ({
     costName: name,
     copayAmount: '',
@@ -54,11 +54,11 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
     setPlans((prev) => [...prev, newPlan]);
 
     setPlanName('');
-    setIndividualDeductible('');
-    setIndividualOOPMax('');
-    setFamilyDeductible('');
-    setFamilyOOPMax('');
-    setCoinsurance('');
+    setIndividualDeductible(0);
+    setIndividualOOPMax(0);
+    setFamilyDeductible(0);
+    setFamilyOOPMax(0);
+    setCoinsurance(0);
     setCosts(costNames.map(name => ({
       costName: name,
       copayAmount: '',
@@ -160,52 +160,70 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
           </label>
         ))}
         <div>
-          <input
-            type="text"
-            value={planName}
-            onChange={(e) => setPlanName(e.target.value)}
-            placeholder="Plan Name"
-            required
-          />
-          <input
-            type="text"
-            value={coinsurance}
-            onChange={(e) => setCoinsurance(e.target.value)}
-            placeholder="Coinsurance"
-            required
-          />
+          <label>
+            Plan Name:
+            <input
+              type="text"
+              value={planName}
+              onChange={(e) => setPlanName(e.target.value)}
+              placeholder="Plan Name"
+              required
+            />
+          </label>
+          <label>
+            Coinsurance:
+            <input
+              type="number"
+              value={coinsurance}
+              onChange={(e) => setCoinsurance(e.target.value)}
+              placeholder="Coinsurance"
+              required
+            />
+          </label>
         </div>
         <div>
-          <input
-            type="text"
-            value={individualDeductible}
-            onChange={(e) => setIndividualDeductible(e.target.value)}
-            placeholder="Individual Deductible"
-            required
-          />
-          <input
-            type="text"
-            value={individualOOPMax}
-            onChange={(e) => setIndividualOOPMax(e.target.value)}
-            placeholder="Individual OOP Max"
-            required
-          />
+          <label>
+            Individual Deductible:
+            <input
+              type="number"
+              value={individualDeductible}
+              onChange={(e) => setIndividualDeductible(e.target.value)}
+              placeholder="Individual Deductible"
+              required
+            />
+          </label>
+          <label>
+            Individual OOP Max:
+            <input
+              type="number"
+              value={individualOOPMax}
+              onChange={(e) => setIndividualOOPMax(e.target.value)}
+              placeholder="Individual OOP Max"
+              required
+            />
+          </label>
         </div>
         <div>
-          <input
-            type="text"
-            value={familyDeductible}
-            onChange={(e) => setFamilyDeductible(e.target.value)}
-            placeholder="Family Deductible"
-            required
-          />
-          <input
-            type="text"
-            value={familyOOPMax}
-            onChange={(e) => setFamilyOOPMax(e.target.value)}
-            placeholder="Family OOP Max"
-            required
-          />
+          <label>
+            Family Deductible:
+            <input
+              type="number"
+              value={familyDeductible}
+              onChange={(e) => setFamilyDeductible(e.target.value)}
+              placeholder="Family Deductible"
+              required
+            />
+          </label>
+          <label>
+            Family OOP Max:
+            <input
+              type="number"
+              value={familyOOPMax}
+              onChange={(e) => setFamilyOOPMax(e.target.value)}
+              placeholder="Family OOP Max"
+              required
+            />
+          </label>
         </div>
         <h3>HSA Information</h3>
         <label>
@@ -222,7 +240,7 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
               <label>
                 Ind. Fixed Employer Contribution:
                 <input
-                  type="text"
+                  type="number"
                   value={individualFixedEmployerContribution}
                   onChange={(e) => setIndividualFixedEmployerContribution(e.target.value)}
                 />
@@ -230,7 +248,7 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
               <label>
                 Ind. Employer Max Match:
                 <input
-                  type="text"
+                  type="number"
                   value={individualEmployerMaxMatch}
                   onChange={(e) => setIndividualEmployerMaxMatch(e.target.value)}
                 />
@@ -238,7 +256,7 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
               <label>
                 Ind. Employer Match Percentage:
                 <input
-                  type="text"
+                  type="number"
                   value={individualEmployerMatchPercentage}
                   onChange={(e) => setIndividualEmployerMatchPercentage(e.target.value)}
                 />
@@ -248,7 +266,7 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
               <label>
                 Fam. Fixed Employer Contribution:
                 <input
-                  type="text"
+                  type="number"
                   value={familyFixedEmployerContribution}
                   onChange={(e) => setFamilyFixedEmployerContribution(e.target.value)}
                 />
@@ -256,7 +274,7 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
               <label>
                 Fam. Employer Max Match:
                 <input
-                  type="text"
+                  type="number"
                   value={familyEmployerMaxMatch}
                   onChange={(e) => setFamilyEmployerMaxMatch(e.target.value)}
                 />
@@ -264,7 +282,7 @@ function PlanForm({ companies, costNames, plans, setPlans, clearAllData }) {
               <label>
                 Fam. Employer Match Percentage:
                 <input
-                  type="text"
+                  type="number"
                   value={familyEmployerMatchPercentage}
                   onChange={(e) => setFamilyEmployerMatchPercentage(e.target.value)}
                 />

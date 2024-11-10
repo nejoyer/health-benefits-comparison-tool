@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 function Results({ companies, costNames, familyMembers, plans, rewards, clearAllData }) {
     const [maximizeHsa, setMaximizeHsa] = useState(false);
-    const [employeeHsaContribution, setEmployeeHsaContribution] = useState('');
-    const [marginalTaxPercentage, setMarginalTaxPercentage] = useState('');
+    const [employeeHsaContribution, setEmployeeHsaContribution] = useState(0);
+    const [marginalTaxPercentage, setMarginalTaxPercentage] = useState(0);
+    const [results, setResults] = useState([]);
+    const [maxImpactCombination, setMaxImpactCombination] = useState(null);
     const navigate = useNavigate();
 
     const [costDetails, setCostDetails] = useState(() => {
@@ -12,145 +14,152 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
             acc[member.name] = costNames.reduce((costAcc, costName) => {
                 costAcc[costName] = { instances: 0, totalCost: 0 };
                 return costAcc;
-            }, {});
+            }, { "Other Costs": { instances: 0, totalCost: 0 } });
             return acc;
         }, {});
     });
 
-    const handleClearAll = () => {
-        clearAllData();
-        navigate('/');
-    };
+    useEffect(() => {
+        const createPlanInstances = (plans, familyMembers) => {
+            const planInstances = [];
 
-    const exportData = () => {
-        const data = {
-            companies,
-            costNames,
-            familyMembers,
-            plans,
-            costDetails,
-            rewards
-        };
-        const dataStr = JSON.stringify(data, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'data.json';
-        a.click();
-        URL.revokeObjectURL(url);
-    };
-
-    const createPlanInstances = (plans, familyMembers) => {
-        const planInstances = [];
-
-        plans.forEach(plan => {
-            plan.employeeContributions.forEach(contribution => {
-                if (!contribution.notOffered) {
-                    const coveredMembers = familyMembers.filter(member => {
-                        switch (contribution.type) {
-                            case 'employeeOnly':
-                                return member.companies.includes(plan.selectedCompanies[0]);
-                            case 'employeeSpouse':
-                                return member.companies.length > 0;
-                            case 'employeeChildren':
-                                return member.companies.includes(plan.selectedCompanies[0]) || member.companies.length === 0;
-                            case 'family':
-                                return true;
-                            default:
-                                return false;
-                        }
-                    });
-
-                    const expectedRewards = coveredMembers.reduce((acc, member) => {
-                        return acc + (plan.rewards?.[member.name] || 0);
-                    }, 0);
-
-                    let hsaEmployerContribution = 0;
-                    let tempEmployeeHsaContribution = 0;
-                    if (plan.hsaEligible) {
-                        const fixedContribution = contribution.type === 'employeeOnly'
-                            ? plan.individualFixedEmployerContribution
-                            : plan.familyFixedEmployerContribution;
-
-                        const maxMatch = contribution.type === 'employeeOnly'
-                            ? plan.individualEmployerMaxMatch
-                            : plan.familyEmployerMaxMatch;
-
-                        const matchPercentage = contribution.type === 'employeeOnly'
-                            ? plan.individualEmployerMatchPercentage
-                            : plan.familyEmployerMatchPercentage;
-
-                        if (fixedContribution) {
-                            hsaEmployerContribution = fixedContribution;
-                        } else {
-                            if (maximizeHsa) {
-                                hsaEmployerContribution = maxMatch;
-                            } else {
-                                const calculatedMatch = (employeeHsaContribution * matchPercentage) / 100.0;
-                                hsaEmployerContribution = Math.min(calculatedMatch, maxMatch);
+            plans.forEach(plan => {
+                plan.employeeContributions.forEach(contribution => {
+                    if (!contribution.notOffered) {
+                        const coveredMembers = familyMembers.filter(member => {
+                            switch (contribution.type) {
+                                case 'employeeOnly':
+                                    return member.companies.includes(plan.selectedCompanies[0]);
+                                case 'employeeSpouse':
+                                    return member.companies.length > 0;
+                                case 'employeeChildren':
+                                    return member.companies.includes(plan.selectedCompanies[0]) || member.companies.length === 0;
+                                case 'family':
+                                    return true;
+                                default:
+                                    return false;
                             }
-                        }
+                        });
 
-                        if (maximizeHsa) {
-                            tempEmployeeHsaContribution = contribution.type === 'employeeOnly' ? 4300 - hsaEmployerContribution : 8550 - hsaEmployerContribution;
-                        } else {
-                            tempEmployeeHsaContribution = parseFloat(employeeHsaContribution);
-                        }
-                    }
-
-                    const hsaTaxSavings = (tempEmployeeHsaContribution * marginalTaxPercentage) / 100.0;
-
-                    const healthCareCosts = coveredMembers.map(member => {
-                        const totalCost = Object.entries(costDetails[member.name]).reduce((costAcc, [costName, costDetail]) => {
-                            const planCost = plan.costs.find(c => c.costName === costName);
-                            if (planCost) {
-                                if (planCost.isCoinsurance) {
-                                    return costAcc + costDetail.totalCost;
-                                } else {
-                                    return costAcc + (costDetail.instances * planCost.copayAmount / 100.0);
-                                }
-                            }
-                            return costAcc;
+                        const expectedRewards = coveredMembers.reduce((acc, member) => {
+                            return acc + (parseFloat(plan.rewards?.[member.name]) || 0);
                         }, 0);
 
-                        return {
-                            name: member.name,
-                            totalCost: Math.min(totalCost, plan.individualDeductible)
+                        let hsaEmployerContribution = 0;
+                        let tempEmployeeHsaContribution = 0;
+                        if (plan.hsaEligible) {
+                            const fixedContribution = contribution.type === 'employeeOnly'
+                                ? parseFloat(plan.individualFixedEmployerContribution)
+                                : parseFloat(plan.familyFixedEmployerContribution);
+
+                            const maxMatch = contribution.type === 'employeeOnly'
+                                ? parseFloat(plan.individualEmployerMaxMatch)
+                                : parseFloat(plan.familyEmployerMaxMatch);
+
+                            const matchPercentage = contribution.type === 'employeeOnly'
+                                ? parseFloat(plan.individualEmployerMatchPercentage)
+                                : parseFloat(plan.familyEmployerMatchPercentage);
+
+                            if (fixedContribution) {
+                                hsaEmployerContribution = fixedContribution;
+                            } else {
+                                if (maximizeHsa) {
+                                    hsaEmployerContribution = maxMatch;
+                                } else {
+                                    const calculatedMatch = (parseFloat(employeeHsaContribution) * matchPercentage) / 100.0;
+                                    hsaEmployerContribution = Math.min(calculatedMatch, maxMatch);
+                                }
+                            }
+
+                            if (maximizeHsa) {
+                                tempEmployeeHsaContribution = contribution.type === 'employeeOnly' ? 4300 - hsaEmployerContribution : 8550 - hsaEmployerContribution;
+                            } else {
+                                tempEmployeeHsaContribution = parseFloat(employeeHsaContribution);
+                            }
+                        }
+
+                        const hsaTaxSavings = (tempEmployeeHsaContribution * parseFloat(marginalTaxPercentage)) / 100.0;
+
+                        const healthCareCosts = coveredMembers.map(member => {
+                            const totalCost = Object.entries(costDetails[member.name]).reduce((costAcc, [costName, costDetail]) => {
+                                const planCost = plan.costs.find(c => c.costName === costName);
+                                if (planCost) {
+                                    if (planCost.isCoinsurance) {
+                                        return costAcc + parseFloat(costDetail.totalCost);
+                                    } else {
+                                        return costAcc + (parseFloat(costDetail.instances) * parseFloat(planCost.copayAmount));
+                                    }
+                                }
+                                return costAcc;
+                            }, 0);
+
+                            let memberCost = totalCost;
+                            if (totalCost > parseFloat(plan.individualDeductible)) {
+                                const coinsuranceAmount = (totalCost - parseFloat(plan.individualDeductible)) * (parseFloat(plan.coinsurance) / 100.0);
+                                memberCost = parseFloat(plan.individualDeductible) + coinsuranceAmount;
+                            }
+                            if (memberCost > parseFloat(plan.individualOOPMax)) {
+                                memberCost = parseFloat(plan.individualOOPMax);
+                            }
+
+                            return {
+                                name: member.name,
+                                totalCost: memberCost
+                            };
+                        });
+
+                        const totalHealthCareCosts = healthCareCosts.reduce((acc, cost) => acc + cost.totalCost, 0);
+
+                        const financialImpact = (expectedRewards + hsaTaxSavings + hsaEmployerContribution - parseFloat(contribution.biweeklyContribution) * 26.0 - totalHealthCareCosts).toFixed(2);
+
+                        const planInstance = {
+                            planName: plan.planName,
+                            selectedCompany: plan.selectedCompanies.join(', '),
+                            costs: plan.costs,
+                            coinsurance: plan.coinsurance,
+                            hsaEligible: plan.hsaEligible,
+                            hsaEmployerFixedContribution: contribution.type === 'employeeOnly' ? plan.individualFixedEmployerContribution : plan.familyFixedEmployerContribution,
+                            hsaEmployerMaxMatch: contribution.type === 'employeeOnly' ? plan.individualEmployerMaxMatch : plan.familyEmployerMaxMatch,
+                            hsaEmployerMatchPercentage: contribution.type === 'employeeOnly' ? plan.individualEmployerMatchPercentage : plan.familyEmployerMatchPercentage,
+                            deductible: contribution.type === 'employeeOnly' ? plan.individualDeductible : plan.familyDeductible,
+                            oopMax: contribution.type === 'employeeOnly' ? plan.individualOOPMax : plan.familyOOPMax,
+                            totalEmployeeContribution: parseFloat(contribution.biweeklyContribution) * 26,
+                            contributionType: contribution.type,
+                            coveredMembers: coveredMembers.map(member => member.name),
+                            expectedRewards,
+                            hsaTaxSavings,
+                            hsaEmployerContribution,
+                            healthCareCosts,
+                            totalHealthCareCosts,
+                            financialImpact: parseFloat(financialImpact)
                         };
-                    });
-
-                    const totalHealthCareCosts = healthCareCosts.reduce((acc, cost) => acc + cost.totalCost, 0);
-
-                    const planInstance = {
-                        planName: plan.planName,
-                        selectedCompany: plan.selectedCompanies.join(', '),
-                        costs: plan.costs,
-                        coinsurance: plan.coinsurance,
-                        hsaEligible: plan.hsaEligible,
-                        hsaEmployerFixedContribution: contribution.type === 'employeeOnly' ? plan.individualFixedEmployerContribution : plan.familyFixedEmployerContribution,
-                        hsaEmployerMaxMatch: contribution.type === 'employeeOnly' ? plan.individualEmployerMaxMatch : plan.familyEmployerMaxMatch,
-                        hsaEmployerMatchPercentage: contribution.type === 'employeeOnly' ? plan.individualEmployerMatchPercentage : plan.familyEmployerMatchPercentage,
-                        deductible: contribution.type === 'employeeOnly' ? plan.individualDeductible : plan.familyDeductible,
-                        oopMax: contribution.type === 'employeeOnly' ? plan.individualOOPMax : plan.familyOOPMax,
-                        totalEmployeeContribution: contribution.biweeklyContribution * 26,
-                        contributionType: contribution.type,
-                        coveredMembers: coveredMembers.map(member => member.name),
-                        expectedRewards,
-                        hsaTaxSavings,
-                        hsaEmployerContribution,
-                        healthCareCosts,
-                        totalHealthCareCosts
-                    };
-                    planInstances.push(planInstance);
-                }
+                        planInstances.push(planInstance);
+                    }
+                });
             });
-        });
 
-        return planInstances;
-    };
+            return planInstances;
+        };
 
-    const planInstances = createPlanInstances(plans, familyMembers);
+        const calculateResults = () => {
+            const planInstances = createPlanInstances(plans, familyMembers);
+            const validCombinations = generateCombinations(planInstances).filter(combination =>
+                isValidCombination(combination, companies, familyMembers)
+            );
+
+            const combinationsWithImpact = validCombinations.map(combination => {
+                const totalFinancialImpact = combination.reduce((acc, instance) => acc + instance.financialImpact, 0);
+                return { combination, totalFinancialImpact };
+            });
+
+            const maxImpactCombination = combinationsWithImpact.reduce((max, current) => current.totalFinancialImpact > max.totalFinancialImpact ? current : max, combinationsWithImpact[0]);
+
+            setResults(combinationsWithImpact);
+            setMaxImpactCombination(maxImpactCombination);
+        };
+
+        calculateResults();
+    }, [costDetails, plans, rewards, familyMembers, companies, employeeHsaContribution, maximizeHsa, marginalTaxPercentage]);
 
     const generateCombinations = (arr) => {
         const result = [];
@@ -185,9 +194,29 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
         return familyMembers.every(member => coveredMembers.has(member.name));
     };
 
-    const validCombinations = generateCombinations(planInstances).filter(combination =>
-        isValidCombination(combination, companies, familyMembers)
-    );
+    const handleClearAll = () => {
+        clearAllData();
+        navigate('/');
+    };
+
+    const exportData = () => {
+        const data = {
+            companies,
+            costNames,
+            familyMembers,
+            plans,
+            costDetails,
+            rewards
+        };
+        const dataStr = JSON.stringify(data, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'data.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    };
 
     return (
         <div>
@@ -228,23 +257,24 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
                 </div>
             </div>
             <div>
-                {familyMembers.map((member, memberIndex) => (
-                    <div key={memberIndex}>
-                        <h3>{member.name}</h3>
-                        {costNames.map((costName, costIndex) => (
-                            <div key={costIndex}>
-                                <h4>{costName}</h4>
+                <h3>Enter Cost Details</h3>
+                {Object.entries(costDetails).map(([memberName, costs]) => (
+                    <div key={memberName}>
+                        <h4>{memberName}</h4>
+                        {Object.entries(costs).map(([costName, costDetail]) => (
+                            <div key={costName}>
+                                <h5>{costName}</h5>
                                 <label>
                                     Instances:
                                     <input
                                         type="number"
-                                        value={costDetails[member.name]?.[costName]?.instances || 0}
+                                        value={costDetail.instances}
                                         onChange={(e) => setCostDetails(prevDetails => ({
                                             ...prevDetails,
-                                            [member.name]: {
-                                                ...prevDetails[member.name],
+                                            [memberName]: {
+                                                ...prevDetails[memberName],
                                                 [costName]: {
-                                                    ...prevDetails[member.name][costName],
+                                                    ...prevDetails[memberName][costName],
                                                     instances: e.target.value
                                                 }
                                             }
@@ -255,13 +285,13 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
                                     Total Cost:
                                     <input
                                         type="number"
-                                        value={costDetails[member.name]?.[costName]?.totalCost || 0}
+                                        value={costDetail.totalCost}
                                         onChange={(e) => setCostDetails(prevDetails => ({
                                             ...prevDetails,
-                                            [member.name]: {
-                                                ...prevDetails[member.name],
+                                            [memberName]: {
+                                                ...prevDetails[memberName],
                                                 [costName]: {
-                                                    ...prevDetails[member.name][costName],
+                                                    ...prevDetails[memberName][costName],
                                                     totalCost: e.target.value
                                                 }
                                             }
@@ -280,26 +310,31 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
             <button onClick={exportData}>Export Data</button>
             <div>
                 <h3>Valid Plan Combinations</h3>
-                {validCombinations.map((combination, index) => (
-                    <div key={index}>
-                        <h4>Combination {index + 1}</h4>
-                        {combination.map((instance, idx) => (
-                            <div key={idx}>
-                                <p>({instance.planName}, {instance.selectedCompany}, {instance.contributionType})</p>
-                                <p>Expected Rewards: ${instance.expectedRewards}</p>
-                                <p>HSA Tax Savings: ${instance.hsaTaxSavings}</p>
-                                <p>HSA Employer Contribution: ${instance.hsaEmployerContribution}</p>
-                                <p>Total Health Care Costs: ${instance.totalHealthCareCosts}</p>
-                                <p>Health Care Costs:</p>
-                                <ul>
-                                    {instance.healthCareCosts.map((cost, costIdx) => (
-                                        <li key={costIdx}>{cost.name}: ${cost.totalCost}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
-                ))}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                    {results.map(({ combination, totalFinancialImpact }, index) => (
+                        <div key={index} style={{ border: '1px solid #ccc', padding: '16px', borderRadius: '8px', backgroundColor: totalFinancialImpact === maxImpactCombination.totalFinancialImpact ? '#d4edda' : 'transparent' }}>
+                            <h4>Combination {index + 1}</h4>
+                            {combination.map((instance, idx) => (
+                                <div key={idx}>
+                                    <h5>({instance.planName}, {instance.selectedCompany}, {instance.contributionType})</h5>
+                                    <div>Expected Rewards: ${instance.expectedRewards.toFixed(2)}</div>
+                                    <div>HSA Tax Savings: ${instance.hsaTaxSavings.toFixed(2)}</div>
+                                    <div>HSA Employer Contribution: ${instance.hsaEmployerContribution.toFixed(2)}</div>
+                                    <div>Payroll Deductions: ${instance.totalEmployeeContribution.toFixed(2)}</div>
+                                    <div>Health Care Costs:</div>
+                                    <ul>
+                                        {instance.healthCareCosts.map((cost, costIdx) => (
+                                            <li key={costIdx}>{cost.name}: ${cost.totalCost.toFixed(2)}</li>
+                                        ))}
+                                    </ul>
+                                    <div>Total Health Care Costs: ${instance.totalHealthCareCosts.toFixed(2)}</div>
+                                    <div><strong>Financial Impact: ${instance.financialImpact.toFixed(2)}</strong></div>
+                                </div>
+                            ))}
+                            <div><strong>Total Financial Impact: ${totalFinancialImpact.toFixed(2)}</strong></div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
