@@ -34,7 +34,7 @@ function App() {
           <Route path="/cost-names" element={<CostNames costNames={costNames} setCostNames={setCostNames} clearAllData={clearAllData} />} />
           <Route path="/plans" element={<PlanForm companies={companies} costNames={costNames} setPlans={setPlans} plans={plans} clearAllData={clearAllData} />} />
           <Route path="/family" element={<FamilyForm companies={companies} familyMembers={familyMembers} setFamilyMembers={setFamilyMembers} clearAllData={clearAllData} />} />
-          <Route path="/rewards" element={<RewardsForm plans={plans} familyMembers={familyMembers} rewards={rewards} setRewards={setRewards} clearAllData={clearAllData} />} />
+          <Route path="/rewards" element={<RewardsForm plans={plans} familyMembers={familyMembers} setPlans={setPlans} clearAllData={clearAllData} />} />
           <Route path="/results" element={<Results companies={companies} costNames={costNames} familyMembers={familyMembers} plans={plans} rewards={rewards} clearAllData={clearAllData} />} />
         </Routes>
       </div>

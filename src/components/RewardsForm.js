@@ -1,32 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-function RewardsForm({ plans, familyMembers, clearAllData }) {
-  const [rewards, setRewards] = useState({});
-
-  useEffect(() => {
-    if (plans && familyMembers) {
-      const initialRewards = plans.reduce((acc, plan) => {
-        acc[plan.planName] = familyMembers.reduce((famAcc, member) => {
-          famAcc[member.name] = 0;
-          return famAcc;
-        }, {});
-        return acc;
-      }, {});
-      setRewards(initialRewards);
-    }
-  }, [plans, familyMembers]);
-
+function RewardsForm({ plans, familyMembers, setPlans, clearAllData }) {
   const navigate = useNavigate();
 
-  const handleRewardChange = (planName, memberName, value) => {
-    setRewards(prevRewards => ({
-      ...prevRewards,
-      [planName]: {
-        ...prevRewards[planName],
-        [memberName]: Number(value)
+  const handleRewardChange = (planIndex, memberName, value) => {
+    const updatedPlans = plans.map((plan, index) => {
+      if (index === planIndex) {
+        return {
+          ...plan,
+          rewards: {
+            ...plan.rewards,
+            [memberName]: Number(value)
+          }
+        };
       }
-    }));
+      return plan;
+    });
+    setPlans(updatedPlans);
   };
 
   const handleClearAll = () => {
@@ -46,8 +37,8 @@ function RewardsForm({ plans, familyMembers, clearAllData }) {
                 {member.name}:
                 <input
                   type="number"
-                  value={rewards[plan.planName]?.[member.name] || 0}
-                  onChange={(e) => handleRewardChange(plan.planName, member.name, e.target.value)}
+                  value={plan.rewards?.[member.name] || 0}
+                  onChange={(e) => handleRewardChange(planIndex, member.name, e.target.value)}
                   placeholder="Expected Rewards"
                 />
               </label>

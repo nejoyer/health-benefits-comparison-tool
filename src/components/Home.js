@@ -26,7 +26,7 @@ function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
       <p>A non-exhaustive list of limitations</p>
       <ul>
         <li>This is for financial considerations only. You might be better off choosing only on if the network covers your preferred provider.</li>
-        <li>This doesn't evaluate the time-cost of money (ie. cashflow)</li>
+        <li>This doesn't evaluate the time-cost of money (ie. cashflow since I include HSA tax savings, but you might not get that until you get your refund in the spring)</li>
         <li>Assumption: For plans with multiple people, I assume that the Annual Deductible per-person is 1/2 of the total and that the OOPM per-person is 1/2 of the total.</li>
         <li>I did not evaluate situations where an individual would be covered by multiple plans... mostly because I've never been in that situation and I don't know how the insurance would be applied.</li>
       </ul>
