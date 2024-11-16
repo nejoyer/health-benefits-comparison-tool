@@ -29,8 +29,18 @@ function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
         <li>This doesn't evaluate the time-cost of money (ie. cashflow since I include HSA tax savings, but you might not get that until you get your refund in the spring)</li>
         <li>Assumption: For plans with multiple people, I assume that the Annual Deductible per-person is 1/2 of the total and that the OOPM per-person is 1/2 of the total.</li>
         <li>I did not evaluate situations where an individual would be covered by multiple plans... mostly because I've never been in that situation and I don't know how the insurance would be applied.</li>
+        <li>I assume at MOST 2 working adults... I'm not sure if more than 2 is a valid tax situation. I don't know how to cover it.</li>
+        <li>Financial Impact for each plan doesn't include HSA impact... because there are IRS limits about your total family HSA benefits... so I had to calculate that at the comination level. It is included in the grand total though.</li>
+        <li>I didn't cover the craziest edge cases, like if your employer's fixed + max match is greater than the IRS limits.</li>
+        <li>Some code for this project was generated using an LLM for expedience and uses coding constructs which I neither understand nor condone... but seem to work.</li>
+        <li>Last edited in November 2024 with Tax Year 2025 in mind (for things like HSA contribution limits)</li>
         <li>This hasn't been extensively tested... I probably got some of the calculations wrong. Check the math yourself. If you find discrepancies, let me know.</li>
+        <li>The UI is intentionally clunky to show this is an app that was thrown together so caeat emptor.</li>
       </ul>
+      <h2>Instructions</h2>
+      <ol>
+        <li>TODO. I didn't have time to type it out. Hopefully I'll get to this soon.</li>
+      </ol>
       <Link to="/companies">
         <button>Get Started</button>
       </Link>
