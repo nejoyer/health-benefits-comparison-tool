@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/health-benefits-comparison-tool/static/css/main.e6c13ad2.css",
-    "main.js": "/health-benefits-comparison-tool/static/js/main.bdf671ce.js",
-    "static/js/453.1c5d174d.chunk.js": "/health-benefits-comparison-tool/static/js/453.1c5d174d.chunk.js",
-    "index.html": "/health-benefits-comparison-tool/index.html",
-    "main.e6c13ad2.css.map": "/health-benefits-comparison-tool/static/css/main.e6c13ad2.css.map",
-    "main.bdf671ce.js.map": "/health-benefits-comparison-tool/static/js/main.bdf671ce.js.map",
-    "453.1c5d174d.chunk.js.map": "/health-benefits-comparison-tool/static/js/453.1c5d174d.chunk.js.map"
+    "main.css": "./static/css/main.e6c13ad2.css",
+    "main.js": "./static/js/main.690b98ff.js",
+    "static/js/453.1c5d174d.chunk.js": "./static/js/453.1c5d174d.chunk.js",
+    "index.html": "./index.html",
+    "main.e6c13ad2.css.map": "./static/css/main.e6c13ad2.css.map",
+    "main.690b98ff.js.map": "./static/js/main.690b98ff.js.map",
+    "453.1c5d174d.chunk.js.map": "./static/js/453.1c5d174d.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.bdf671ce.js"
+    "static/js/main.690b98ff.js"
   ]
 }
