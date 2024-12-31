@@ -25,9 +25,9 @@ function App() {
   };
 
   return (
-    <Router>
+    <Router basename='/health-benefits-comparison-tool'>
       <div className="App">
-        <h1>Healthcare Benefits Comparison</h1>
+        <h1>Healthcare Benefits Comparison Tool</h1>
         <Routes>
           <Route path="/" element={<Home setCompanies={setCompanies} setCostNames={setCostNames} setFamilyMembers={setFamilyMembers} setPlans={setPlans} />} />
           <Route path="/companies" element={<CompanyForm companies={companies} setCompanies={setCompanies} clearAllData={clearAllData} />} />
