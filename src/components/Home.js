@@ -1,6 +1,7 @@
 // src/components/Home.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { TAX_YEAR, LAST_UPDATED, TAX_RATES_LINK } from '../constants';
 
 function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
   const [importData, setImportData] = useState('');
@@ -29,10 +30,9 @@ function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
         <li>This doesn't evaluate the time-cost of money (ie. cashflow since I include HSA tax savings, but you might not get that until you get your refund in the spring), nor any expected future growth on tax-advantaged HSA investments.</li>
         <li>Assumption: For plans with multiple people, I assume that the Annual Deductible per-person is what the individual deductible would be for the same plan and that the OOPM per-person is what the individual OOPM would be for the same plan. (In my experience this has always been the case for the plans I've seen, but I don't know how universal that is).</li>
         <li>I did not evaluate situations where an individual would be covered by multiple plans... mostly because I've never been in that situation and I don't know how the insurance would be applied.</li>
-        <li>I assume at MOST 2 working adults (non-dependents)... I'm not sure if more than 2 is a valid tax situation. I don't know how to cover it.</li>
-        <li>I didn't cover the craziest edge cases, like if your employer's fixed + max match is greater than the IRS limits.</li>
+        <li>I assume at MOST 2 working adults (non-dependents)... I'm not sure if more than 2 is a valid tax situation. I don't know how to cover it.</li>        <li>I didn't cover the craziest edge cases, like if your employer's fixed + max match is greater than the IRS limits.</li>
         <li>Some code for this project was generated using an LLM for expedience and uses coding constructs which I neither understand nor condone... but seem to work.</li>
-        <li>Last edited in November 2024 with Tax Year 2025 in mind (for things like HSA contribution limits)</li>
+        <li>Last edited in {LAST_UPDATED} with Tax Year {TAX_YEAR} in mind (for things like HSA contribution limits)</li>
         <li>This hasn't been extensively tested... I probably got some of the calculations wrong. Check the math yourself. If you find discrepancies, let me know (better yet, send PRs).</li>
         <li>The UI is intentionally clunky to show this is an app that was thrown together... so... caveat emptor.</li>
         <li>Source code is at <a href='https://github.com/nejoyer/health-benefits-comparison-tool'>https://github.com/nejoyer/health-benefits-comparison-tool</a>. No warranty expressed or implied.</li>
@@ -79,12 +79,11 @@ function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
             <li>Children (dependants) will be identified as those without a company assigned to them.</li>
           </ul>
         </li>
-        <li>Enter how much each family member would make in rewards dollars if they were on each plan. (I've seen some amazing rewards programs, so that can really swing the results if you're able to capitalize on those). If there is no rewards program or if any individual is ineligible, just leave it at 0.</li>
-        <li>
+        <li>Enter how much each family member would make in rewards dollars if they were on each plan. (I've seen some amazing rewards programs, so that can really swing the results if you're able to capitalize on those). If there is no rewards program or if any individual is ineligible, just leave it at 0.</li>        <li>
           Results Page:
           <ul>
-            <li>You can enter how much you would contribute to an HSA. Enter your marginal tax rate as a percentage. <a href='https://www.irs.gov/newsroom/irs-releases-tax-inflation-adjustments-for-tax-year-2025'>Tax Rates.</a> </li>
-            <li>Then enter a scenario for your health care consumption. For each of the cost types you entered, enter how many times you'll use that type of health care. 
+            <li>You can enter how much you would contribute to an HSA. Enter your marginal tax rate as a percentage. <a href={TAX_RATES_LINK}>Tax Rates.</a> </li>
+            <li>Then enter a scenario for your health care consumption. For each of the cost types you entered, enter how many times you'll use that type of health care.
               <ul>
                 <li>Ex. If you think you would go to the doctor for a "office visit" twice and between the two times, that would cost $500 ($250 each), then put 2 instances and 500 total.</li>
                 <li>Anything that isn't broken out by your cost types, just put in "Other Costs" (instances doesn't really matter). These are things that will just go against your deductible and the coinsurance for every plan.</li>

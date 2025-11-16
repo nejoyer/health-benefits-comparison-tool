@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { HSA_LEGAL_LIMIT_INDIVIDUAL, HSA_LEGAL_LIMIT_FAMILY } from '../constants';
 
 function parseFloatOrDefault(value, defaultValue = 0) {
     const parsed = parseFloat(value);
@@ -92,11 +93,10 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
                             selectedCompany: plan.selectedCompanies.join(', '),
                             costs: plan.costs,
                             coinsurance: plan.coinsurance,
-                            hsaEligible: plan.hsaEligible,
-                            hsaEmployerFixedContribution: contribution.type === 'employeeOnly' ? parseFloatOrDefault(plan.individualFixedEmployerContribution) : parseFloatOrDefault(plan.familyFixedEmployerContribution),
+                            hsaEligible: plan.hsaEligible,                            hsaEmployerFixedContribution: contribution.type === 'employeeOnly' ? parseFloatOrDefault(plan.individualFixedEmployerContribution) : parseFloatOrDefault(plan.familyFixedEmployerContribution),
                             hsaEmployerMaxMatch: contribution.type === 'employeeOnly' ? parseFloatOrDefault(plan.individualEmployerMaxMatch) : parseFloatOrDefault(plan.familyEmployerMaxMatch),
                             hsaEmployerMatchPercentage: contribution.type === 'employeeOnly' ? parseFloatOrDefault(plan.individualEmployerMatchPercentage) : parseFloatOrDefault(plan.familyEmployerMatchPercentage),
-                            hsaLegalLimit: contribution.type === 'employeeOnly' ? 4300 : 8550,
+                            hsaLegalLimit: contribution.type === 'employeeOnly' ? HSA_LEGAL_LIMIT_INDIVIDUAL : HSA_LEGAL_LIMIT_FAMILY,
                             deductible: contribution.type === 'employeeOnly' ? parseFloatOrDefault(plan.individualDeductible) : parseFloatOrDefault(plan.familyDeductible),
                             oopMax: contribution.type === 'employeeOnly' ? parseFloatOrDefault(plan.individualOOPMax) : parseFloatOrDefault(plan.familyOOPMax),
                             totalEmployeeContribution: parseFloatOrDefault(contribution.biweeklyContribution) * 26,
@@ -113,15 +113,13 @@ function Results({ companies, costNames, familyMembers, plans, rewards, clearAll
             });
 
             return planInstances;
-        };
-
-        const calculateHsaImpact = (combination) => {
+        };        const calculateHsaImpact = (combination) => {
             const hsaEligibleInstances = combination.instances.filter(instance => instance.hsaEligible);
             let totalLegalLimit = 0;
             if (hsaEligibleInstances.length > 1 || hsaEligibleInstances.some(instance => instance.contributionType !== 'employeeOnly')) {
-                totalLegalLimit = 8550;
+                totalLegalLimit = HSA_LEGAL_LIMIT_FAMILY;
             } else if (hsaEligibleInstances.length === 1 && hsaEligibleInstances[0].contributionType === 'employeeOnly') {
-                totalLegalLimit = 4300;
+                totalLegalLimit = HSA_LEGAL_LIMIT_INDIVIDUAL;
             }
 
             let totalHsaEmployerContribution = 0;
