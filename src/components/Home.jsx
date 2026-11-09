@@ -36,7 +36,6 @@ function Home({ setCompanies, setCostNames, setFamilyMembers, setPlans }) {
         <li>This hasn't been extensively tested... I probably got some of the calculations wrong. Check the math yourself. If you find discrepancies, let me know (better yet, send PRs).</li>
         <li>The UI is intentionally clunky to show this is an app that was thrown together... so... caveat emptor.</li>
         <li>Source code is at <a href='https://github.com/nejoyer/health-benefits-comparison-tool'>https://github.com/nejoyer/health-benefits-comparison-tool</a>. No warranty expressed or implied.</li>
-        <li>Deployed at 2024-12-16 11:06pm</li>
         <li>Privacy: All of the data is just stored in memory on your browser. Nothing is sent to a server. No cookies are used. If you refresh the page, the data is gone.</li>
       </ul>
       <h2>Instructions</h2>
