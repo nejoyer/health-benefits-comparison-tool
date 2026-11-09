@@ -1,13 +1,21 @@
 version: 2
 updates:
+  # Once a year, ahead of November open enrollment
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: monthly
+      interval: cron
+      cronjob: "0 9 1 10 *"
+      timezone: America/Chicago
     groups:
       npm:
         patterns: ["*"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
+      interval: cron
+      cronjob: "0 9 1 10 *"
+      timezone: America/Chicago
+    groups:
+      actions:
+        patterns: ["*"]
