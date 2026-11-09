@@ -130,3 +130,5 @@ dist
 .pnp.*
 
 /build
+# Local plan data (never commit; repo is public)
+data/
